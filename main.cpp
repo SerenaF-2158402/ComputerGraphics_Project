@@ -3,7 +3,7 @@
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
-
+#include "maze.cpp"
 #include "stb_image.h"
 #include "shader.h"
 
@@ -203,6 +203,7 @@ int main()
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
 
+    Maze();
 
     // render loop
     // -----------
@@ -356,7 +357,6 @@ void processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& came
     if (cameraPitch < minPitch) {
         cameraPitch = minPitch;
     }
-
 
 }
 
