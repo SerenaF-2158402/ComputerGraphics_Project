@@ -1,0 +1,2 @@
+﻿  maze.cpp
+C:\Users\seren\OneDrive\Documenten\Bachelor2\semester2\computer_graphics\Computer graphics OpenGL\glfw-3.3.8.bin.WIN64\glfw-3.3.8.bin.WIN64\include\glad\glad.h(27,1): fatal  error C1189: #error:  OpenGL header already included, remove this include, glad already provides it
