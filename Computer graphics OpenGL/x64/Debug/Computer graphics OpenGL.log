@@ -1,2 +1,3 @@
-﻿  maze.cpp
-C:\Users\seren\OneDrive\Documenten\Bachelor2\semester2\computer_graphics\Computer graphics OpenGL\glfw-3.3.8.bin.WIN64\glfw-3.3.8.bin.WIN64\include\glad\glad.h(27,1): fatal  error C1189: #error:  OpenGL header already included, remove this include, glad already provides it
+﻿  maze.h
+C:\Users\seren\OneDrive\Documenten\Bachelor2\semester2\computer_graphics\ComputerGraphics_Project\ComputerGraphics_Project\Computer graphics OpenGL\maze.h(69,1): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
+  Computer graphics OpenGL.vcxproj -> C:\Users\seren\OneDrive\Documenten\Bachelor2\semester2\computer_graphics\ComputerGraphics_Project\ComputerGraphics_Project\Computer graphics OpenGL\x64\Debug\Computer graphics OpenGL.exe
