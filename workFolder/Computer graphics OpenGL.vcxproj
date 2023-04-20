@@ -138,7 +138,6 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="maze.cpp" />
     <ClCompile Include="mazeGenerator.cpp" />
     <ClCompile Include="movement.cpp" />
     <ClCompile Include="shader.cpp" />
@@ -151,7 +150,6 @@
     <None Include="texture.vs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="maze.h" />
     <ClInclude Include="mazeGenerator.h" />
     <ClInclude Include="movement.h" />
     <ClInclude Include="shader.h" />

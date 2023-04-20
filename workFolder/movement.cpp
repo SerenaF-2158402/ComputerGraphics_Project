@@ -6,12 +6,13 @@ movement::movement() {
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void movement::processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& cameraPosition, glm::vec3& cameraFront, glm::vec3& cameraUp, bool* isJumping, double* jumpStartingTime) {
+void movement::processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::vec3& cameraFront, glm::vec3& cameraUp, bool* isJumping, double* jumpStartingTime, float* cameraYaw, float* cameraPitch) {
     // Close window when pressing escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
     // Handle the extra: jumping
+    // Better way: keep a counter and just do like 10 ticks upwards and then 10 ticks downwards so it's always even
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS || *isJumping) {
         if (!*isJumping)
             *jumpStartingTime = glfwGetTime();
@@ -92,18 +93,18 @@ void movement::processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::
 
     // Check if the mouse moved enough to make movement happen
     if (mouseSensitivity > 0.0002) {
-        cameraYaw += xOffset;
-        cameraPitch -= yOffset;
+        *cameraYaw += xOffset;
+        *cameraPitch -= yOffset;
     }
 
     // Constrain pitch angle so the screen doesn't flip when moving too far
     const float maxPitch = 89.0f;
     const float minPitch = -89.0f;
-    if (cameraPitch > maxPitch) {
-        cameraPitch = maxPitch;
+    if (*cameraPitch > maxPitch) {
+        *cameraPitch = maxPitch;
     }
-    if (cameraPitch < minPitch) {
-        cameraPitch = minPitch;
+    if (*cameraPitch < minPitch) {
+        *cameraPitch = minPitch;
     }
 
 }

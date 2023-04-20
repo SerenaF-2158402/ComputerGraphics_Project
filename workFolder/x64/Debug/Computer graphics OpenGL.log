@@ -1,15 +1,4 @@
 ﻿  main.cpp
-  maze.cpp
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.cpp(155,25): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-  mazeGenerator.cpp
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.h(43,18): error C2143: syntax error: missing ';' before '*'
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.h(43,18): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.h(43,27): error C2238: unexpected token(s) preceding ';'
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\mazeGenerator.cpp(67,68): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
-  movement.cpp
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.h(44,13): error C2143: syntax error: missing ';' before '*'
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.h(44,13): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\maze.h(44,19): error C2238: unexpected token(s) preceding ';'
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\movement.cpp(75,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\movement.cpp(76,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  Generating Code...
+C:\Users\jaspe\Desktop\Computer graphics OpenGL\main.cpp(163,25): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Computer graphics OpenGL.vcxproj -> C:\Users\jaspe\Desktop\Computer graphics OpenGL\x64\Debug\Computer graphics OpenGL.exe

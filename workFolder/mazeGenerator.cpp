@@ -1,8 +1,81 @@
 #include "mazeGenerator.h"
 
 mazeGenerator::mazeGenerator() {
+    readFile();
+    findCubeLocations();
+}
+
+void mazeGenerator::getDebugInfo() {
+    for (std::vector<int> row : maze) {
+        for (int elem : row) {
+            std::cout << elem;
+        }
+    }
+    std::cout << maze.size() << " " << maze.at(0).size();
+
+    // Print out the positions
+    for (int i = 0; i < cubePositions.size(); i++) {
+        std::cout << "Position " << i << ": (" << cubePositions[i].x << ", " << cubePositions[i].y << ", " << cubePositions[i].z << ")" << std::endl;
+    }
 
 }
+
+std::vector<std::vector<int>> mazeGenerator::readFile() {
+    std::vector<std::vector<int>> maze;
+    std::ifstream inFile("maze.txt");
+    if (!inFile.is_open()) {
+        std::cerr << "Failed to open file " << "maze.txt" << "!" << std::endl;
+    }
+
+    std::string line;
+    while (std::getline(inFile, line)) {
+        std::vector<int> row;
+        for (char c : line) {
+            if (c == '#') {
+                row.push_back(1); // muur
+            }
+            else if (c == ' ') {
+                row.push_back(0); // geen muur
+            }
+            else {
+                std::cerr << "Invalid character found in file " << "maze.txt" << "!" << std::endl;
+            }
+        }
+        maze.push_back(row);
+    }
+
+    inFile.close();
+    return maze;
+}
+
+std::vector<glm::vec3> mazeGenerator::findCubeLocations() {
+    // create cubes
+    std::vector<glm::vec3> cubePositions;
+    printf("\n\n\nSIZE::%zd", maze.size());
+    for (int i = 0; i < maze.size(); i++) {
+        for (int j = 0; j < maze.at(i).size(); j++) {
+            if (maze.at(i).at(j) == 1) {
+                // Calculate the position of the cube
+                float x = (i + 1);
+                float y = 0;
+
+                cubePositions.push_back(glm::vec3(i, y, j));
+            }
+        }
+        //float z = (j + 1);
+    }
+    return cubePositions;
+}
+
+std::vector<glm::vec3> mazeGenerator::getCubeLocations() {
+    return cubePositions;
+}
+
+// Getter for the maze file info
+std::vector<std::vector<int>> mazeGenerator::getMazeFromFile() {
+    return maze;
+}
+
 
 //creer de muren
 void mazeGenerator::createWallCubes(const std::vector<std::vector<int>>& mazeArray, int mazeSize, float cubeSize) {        // Loop over the maze array and create cubes for walls
