@@ -1,5 +1,0 @@
-﻿  main.cpp
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\main.cpp(326,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-C:\Users\jaspe\Desktop\Computer graphics OpenGL\main.cpp(327,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-  Computer graphics OpenGL.vcxproj -> C:\Users\jaspe\Desktop\Computer graphics OpenGL\x64\Debug\Computer graphics OpenGL.exe
