@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
@@ -6,7 +7,7 @@
 
 #include "stb_image.h"
 #include "shader.h"
-
+#include "maze.h"
 #include <iostream>
 
 
@@ -15,12 +16,17 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+
 
 int main()
 {
-    // glfw: initialize and configure
+  
+    Maze mazeobj;
+    int result = mazeobj.mazemain();
+    
+
+
+    /* // glfw: initialize and configure
     // ------------------------------
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -253,6 +259,8 @@ int main()
     // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
+    */
+   
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
