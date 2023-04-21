@@ -20,8 +20,7 @@ void mazeGenerator::getDebugInfo() {
 
 }
 
-std::vector<std::vector<int>> mazeGenerator::readFile() {
-    std::vector<std::vector<int>> maze;
+void mazeGenerator::readFile() {
     std::ifstream inFile("maze.txt");
     if (!inFile.is_open()) {
         std::cerr << "Failed to open file " << "maze.txt" << "!" << std::endl;
@@ -45,12 +44,10 @@ std::vector<std::vector<int>> mazeGenerator::readFile() {
     }
 
     inFile.close();
-    return maze;
 }
 
-std::vector<glm::vec3> mazeGenerator::findCubeLocations() {
+void mazeGenerator::findCubeLocations() {
     // create cubes
-    std::vector<glm::vec3> cubePositions;
     printf("\n\n\nSIZE::%zd", maze.size());
     for (int i = 0; i < maze.size(); i++) {
         for (int j = 0; j < maze.at(i).size(); j++) {
@@ -60,22 +57,19 @@ std::vector<glm::vec3> mazeGenerator::findCubeLocations() {
                 float y = 0;
 
                 cubePositions.push_back(glm::vec3(i, y, j));
+                
+                // Get AABB's of the cube
+                AABB aabb;
+                aabb.min = glm::vec3(i - 0.5f, y, j - 0.5f);
+                aabb.max = glm::vec3(i + 0.5f, y + 2.0f, j + 0.5f);
+
+                cubeAABB.push_back(aabb);
+                 
             }
         }
         //float z = (j + 1);
     }
-    return cubePositions;
 }
-
-std::vector<glm::vec3> mazeGenerator::getCubeLocations() {
-    return cubePositions;
-}
-
-// Getter for the maze file info
-std::vector<std::vector<int>> mazeGenerator::getMazeFromFile() {
-    return maze;
-}
-
 
 //creer de muren
 void mazeGenerator::createWallCubes(const std::vector<std::vector<int>>& mazeArray, int mazeSize, float cubeSize) {        // Loop over the maze array and create cubes for walls

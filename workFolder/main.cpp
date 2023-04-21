@@ -21,8 +21,6 @@ int main()
     movement move;
     mazeGenerator generator;
 
-    std::vector<std::vector<int>> maze = generator.readFile();
-
 
     // Settings to be changed to become dynamic
     const unsigned int SCR_WIDTH = 800;
@@ -39,14 +37,6 @@ int main()
     float cameraYaw = -90.0f;
     float cameraPitch = 0.0f;
     float cameraSpeed = 0.05f;
-
-
-    for (std::vector<int> row : maze) {
-        for (int elem : row) {
-            std::cout << elem;
-        }
-    }
-    std::cout << maze.size() << " " << maze.at(0).size();
 
 
     // glfw: initialize and configure
@@ -138,44 +128,6 @@ int main()
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
-    // world space positions of our cubes
-    /*
-    glm::vec3 cubePositions[] = {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-    */
-
-    //create cubes
-    std::vector<glm::vec3> cubePositions;
-    for (int i = 0; i < maze.size(); i++) {
-        for (int j = 0; j < maze.at(i).size(); j++) {
-            if (maze.at(i).at(j) == 1) {
-                // Calculate the position of the cube
-                float x = (i + 1);
-                float y = 0;
-
-                cubePositions.push_back(glm::vec3(i, y, j));
-            }
-        }
-        //float z = (j + 1);
-
-
-    }
-
-    // Print out the positions
-    for (int i = 0; i < cubePositions.size(); i++) {
-        std::cout << "Position " << i << ": (" << cubePositions[i].x << ", " << cubePositions[i].y << ", " << cubePositions[i].z << ")" << std::endl;
-    }
-
     unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -231,41 +183,65 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
-    // load image, create texture and generate mipmaps
-    /*
-    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    */
-
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     ourShader.use();
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
 
+
+    // Get the maze from the input file
+    std::vector<std::vector<int>> maze = generator.getMazeFromFile();
+    // Get the cubes from the maze generator
+    std::vector<glm::vec3> cubePositions = generator.getCubeLocations();
+
     // General settings which need to be defined before the program can run
     // Set jumping to false, is later used to make sure the player can't keep jumping before landing
     bool isJumping{ false };
     double jumpStartingTime = 0.0f;
 
+    // Hide mouse from the screen
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+    // Define AABBs for the player
+    mazeGenerator::AABB playerAABB;
+    playerAABB.min = playerPosition - glm::vec3(0.5f, 0.5f, 0.5f);
+    playerAABB.max = playerPosition + glm::vec3(0.5f, 0.5f, 0.5f);
+
+    // Find boxes' AABB's
+    std::vector<mazeGenerator::AABB> cubeAABBs = generator.getCubeAABB();
+
+    int counter = 0;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
+
+        move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
+
+        // Check if collision:
+        bool collisionFound = false;
+        for (int i = 0; i < cubeAABBs.size(); i++) {
+            mazeGenerator::AABB aabb = cubeAABBs[i];
+            if (playerPosition.x >= aabb.min.x && playerPosition.x <= aabb.max.x &&
+                playerPosition.y >= aabb.min.y && playerPosition.y <= aabb.max.y &&
+                playerPosition.z >= aabb.min.z && playerPosition.z <= aabb.max.z) {
+                printf("COLLISION FOUDN! Counter: %d\n", counter);
+                collisionFound = true;
+                counter++;
+                break;
+            }
+        }
+
+
+        // DO this later
         // input
         // -----
-        move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
+        //if (!collisionFound) {
+        //    move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
+        //}
+
 
         // render
         // ------

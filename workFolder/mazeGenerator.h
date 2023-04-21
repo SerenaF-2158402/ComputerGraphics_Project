@@ -20,20 +20,26 @@
 class mazeGenerator {
 
 public:
+	struct AABB {
+		glm::vec3 min;
+		glm::vec3 max;
+	};
 	mazeGenerator();
 
 	void createWallCubes(const std::vector<std::vector<int>>& mazeArray, int mazeSize, float cubeSize);
 	void drawFloor(const std::vector<std::vector<int>>& maze, float floorSize);
 
-	std::vector<std::vector<int>> getMazeFromFile();
-	std::vector<glm::vec3> getCubeLocations();
-	std::vector<glm::vec3> findCubeLocations();
-	std::vector<std::vector<int>> readFile();
+	std::vector<std::vector<int>> getMazeFromFile() { return maze; };
+	std::vector<glm::vec3> getCubeLocations() { return cubePositions; };
+	std::vector<AABB> getCubeAABB() { return cubeAABB; };
+
 private:
-	
-	
+	void readFile();
+	void findCubeLocations();
+
 	void getDebugInfo();
 
+	std::vector<AABB> cubeAABB;
 	std::vector<glm::vec3> cubePositions;
 	std::vector<std::vector<int>> maze;
 };
