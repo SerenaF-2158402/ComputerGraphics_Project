@@ -1,2 +1,3 @@
-﻿  main.cpp
+﻿  mazeGenerator.cpp
+C:\Users\seren\OneDrive\Documenten\Bachelor2\semester2\computer_graphics\ComputerGraphics_Project\ComputerGraphics_Project\workFolder\mazeGenerator.cpp(62,25): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
   Computer graphics OpenGL.vcxproj -> C:\Users\seren\OneDrive\Documenten\Bachelor2\semester2\computer_graphics\ComputerGraphics_Project\ComputerGraphics_Project\workFolder\x64\Debug\Computer graphics OpenGL.exe

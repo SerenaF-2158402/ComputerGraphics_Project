@@ -1,4 +1,8 @@
 #include "mazeGenerator.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm/glm.hpp>
+#include <glm/glm/gtc/type_ptr.hpp>
 
 mazeGenerator::mazeGenerator() {
     readFile();
@@ -73,23 +77,24 @@ void mazeGenerator::findCubeLocations() {
     }
 
 }
-
 void mazeGenerator::drawFloor() {
     // Compute the dimensions of the floor based on the maze size
-    float width = maze[0].size() * maze.size();
-    float depth = maze.size() * maze.size();
+    float width = maze[0].size() - 0.18f;
+    float depth = maze.size() + 12.0f ;
 
-   // Define the vertices for the floor
+    // Define the vertices for the floor
     float floorVertices[] = {
-        0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, depth,
-        width, 0.0f, depth,
-        width, 0.0f, 0.0f
+        -0.5f, -0.5f,  0.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.0f,  1.0f,  1.0f,
+         0.5f,  0.5f,  0.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.0f,  0.0f,  0.0f,
     };
-
     // Scale the floor vertices to match the maze size
-    for (int i = 0; i < 12; i++) {
-        floorVertices[i] *= maze.size();
+    for (int i = 0; i < 30; i += 5) {
+        floorVertices[i] *= width;
+        floorVertices[i + 1] *= depth;
     }
 
     // Set up the vertex array object (VAO)
@@ -109,47 +114,21 @@ void mazeGenerator::drawFloor() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    glm::mat4 model = glm::mat4(1.0f);
+    Shader ourShader("texture.vs", "texture.fs");
+    model = glm::scale(model, glm::vec3(width, depth, 1.0f));
+    model = glm::translate(model, glm::vec3(-(maze[0].size() / 2.0f), 0.0f, -(maze.size() / 2.0f)));
 
-    // Set the color of the floor to gray
-    glColor3f(0.5f, 0.5f, 0.5f);
+    model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(maze.size() / 4.8f, 27.0f, 0.05f));
+
+    ourShader.setMat4("model", model);
 
     // Draw the floor using glDrawArrays
-    glDrawArrays(GL_QUADS, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     // Clean up the VAO and VBO
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &floorVBO);
     glDeleteVertexArrays(1, &floorVAO);
-}
-
- int mazeGenerator::loadCubemap(std::vector<std::string> faces)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-    int width, height, nrChannels;
-    for (unsigned int i = 0; i < faces.size(); i++)
-    {
-        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-        if (data)
-        {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
-            );
-            stbi_image_free(data);
-        }
-        else
-        {
-            std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
-            stbi_image_free(data);
-        }
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    return textureID;
 }
