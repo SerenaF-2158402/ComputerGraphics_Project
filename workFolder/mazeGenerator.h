@@ -26,14 +26,19 @@ public:
 	};
 	mazeGenerator();
 
-	void createWallCubes(const std::vector<std::vector<int>>& mazeArray, int mazeSize, float cubeSize);
-	void drawFloor(const std::vector<std::vector<int>>& maze, float floorSize);
+	void drawFloor();
+
+	int loadCubemap(std::vector<std::string> faces);
 
 	std::vector<std::vector<int>> getMazeFromFile() { return maze; };
 	std::vector<glm::vec3> getCubeLocations() { return cubePositions; };
 	std::vector<AABB> getCubeAABB() { return cubeAABB; };
 
 private:
+
+
+
+
 	void readFile();
 	void findCubeLocations();
 

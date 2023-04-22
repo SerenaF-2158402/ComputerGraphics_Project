@@ -81,11 +81,11 @@ void movement::processInput(GLFWwindow* window, glm::vec3& playerPosition, glm::
     // Calculate max distance possible
     float maxDistance = sqrt((width / 2.0f) * (width / 2.0f) + (height / 2.0f) * (height / 2.0f));
     // Set mouse sensitivity based on distance from the center of the screen
-    float mouseSensitivity = 0.005f + 0.0001f * (distance / maxDistance);
+    float mouseSensitivity = 0.0005f + 0.00001f * (distance / maxDistance);
 
     // Set a maximum on the mouse sensitivity so the screen doesn't fly away when turning too far
-    if (mouseSensitivity > 0.005)
-        mouseSensitivity = 0.005f;
+    if (mouseSensitivity > 0.0005)
+        mouseSensitivity = 0.0005f;
 
     // Update the offset
     xOffset *= mouseSensitivity;

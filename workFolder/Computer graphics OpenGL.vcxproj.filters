@@ -39,6 +39,10 @@
     <None Include="shaders.fs" />
     <None Include="texture.fs" />
     <None Include="texture.vs" />
+    <None Include="6.1.skybox.vs" />
+    <None Include="6.1.skybox.fs" />
+    <None Include="6.1.cubemaps.vs" />
+    <None Include="6.1.cubemaps.fs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -53,6 +57,9 @@
     <ClInclude Include="movement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="container.jpg">
@@ -60,6 +67,24 @@
     </Image>
     <Image Include="awesomeface.png">
       <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="skybox\back.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="skybox\bottom.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="skybox\front.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="skybox\left.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="skybox\right.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="skybox\top.jpg">
+      <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

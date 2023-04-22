@@ -47,6 +47,8 @@ void mazeGenerator::readFile() {
 }
 
 void mazeGenerator::findCubeLocations() {
+    std::cout << "now find walls";
+
     // create cubes
     printf("\n\n\nSIZE::%zd", maze.size());
     for (int i = 0; i < maze.size(); i++) {
@@ -69,78 +71,85 @@ void mazeGenerator::findCubeLocations() {
         }
         //float z = (j + 1);
     }
+
 }
 
-//creer de muren
-void mazeGenerator::createWallCubes(const std::vector<std::vector<int>>& mazeArray, int mazeSize, float cubeSize) {        // Loop over the maze array and create cubes for walls
-    for (int i = 0; i < mazeSize; i++) {
-        for (int j = 0; j < mazeSize; j++) {
-            if (mazeArray.at(i).at(j) == 1) {
-                // Calculate the position of the cube
-                float x = (i - (mazeSize / 2)) * cubeSize;
-                float y = cubeSize / 2.0f;
-                float z = (j - (mazeSize / 2)) * cubeSize;
+void mazeGenerator::drawFloor() {
+    // Compute the dimensions of the floor based on the maze size
+    float width = maze[0].size() * maze.size();
+    float depth = maze.size() * maze.size();
 
-                // Create the cube using OpenGL functions
-                glPushMatrix();
-                glTranslatef(x, y, z);
-                //teken kubussen
-                glPopMatrix();
-            }
+   // Define the vertices for the floor
+    float floorVertices[] = {
+        0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, depth,
+        width, 0.0f, depth,
+        width, 0.0f, 0.0f
+    };
+
+    // Scale the floor vertices to match the maze size
+    for (int i = 0; i < 12; i++) {
+        floorVertices[i] *= maze.size();
+    }
+
+    // Set up the vertex array object (VAO)
+    unsigned int floorVAO, floorVBO;
+    glGenVertexArrays(1, &floorVAO);
+    glGenBuffers(1, &floorVBO);
+
+    glBindVertexArray(floorVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+
+    // Set the color of the floor to gray
+    glColor3f(0.5f, 0.5f, 0.5f);
+
+    // Draw the floor using glDrawArrays
+    glDrawArrays(GL_QUADS, 0, 4);
+
+    // Clean up the VAO and VBO
+    glDisableVertexAttribArray(0);
+    glDeleteBuffers(1, &floorVBO);
+    glDeleteVertexArrays(1, &floorVAO);
+}
+
+ int mazeGenerator::loadCubemap(std::vector<std::string> faces)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+        if (data)
+        {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+            );
+            stbi_image_free(data);
+        }
+        else
+        {
+            std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
+            stbi_image_free(data);
         }
     }
-}
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-void mazeGenerator::drawFloor(const std::vector<std::vector<int>>& maze, float floorSize) {
-    // Bepaal de grootte van het vlak en de positie op de grond
-    float halfSize = floorSize / 2.0f;
-    glm::vec3 floorPosition = glm::vec3(0.0f, -0.5f, 0.0f);
-
-    // Maak een vector om de hoekpunten van het vlak op te slaan
-    std::vector<glm::vec3> vertices(4);
-
-    // Bereken de hoekpunten van het vlak
-    vertices[0] = glm::vec3(-halfSize, 0.0f, -halfSize);
-    vertices[1] = glm::vec3(-halfSize, 0.0f, halfSize);
-    vertices[2] = glm::vec3(halfSize, 0.0f, -halfSize);
-    vertices[3] = glm::vec3(halfSize, 0.0f, halfSize);
-
-    // Maak een vector om de indices van de driehoeken op te slaan
-    std::vector<unsigned int> indices = { 0, 1, 2, 2, 1, 3 };
-
-    // Maak buffers voor de hoekpunten en de indices van de driehoeken
-    GLuint vertexBuffer, indexBuffer;
-    glGenBuffers(1, &vertexBuffer);
-    glGenBuffers(1, &indexBuffer);
-
-    //vao
-
-    // Zet de buffers in de juiste modus
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-
-    // Vul de buffers met de hoekpunten en de indices van de driehoeken
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
-
-    // Zet de vertexattributen op de juiste manier
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
-
-    // Stel de positie van de mesh in
-    glTranslatef(floorPosition.x, floorPosition.y, floorPosition.z);
-
-    // Teken de mesh
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-
-    // Maak de buffers weer los
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-
-
-    //helemaal op het einde van alles //voor terminate
-    // Verwijder de buffers
-    glDeleteBuffers(1, &vertexBuffer);
-    glDeleteBuffers(1, &indexBuffer);
+    return textureID;
 }
