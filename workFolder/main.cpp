@@ -17,17 +17,34 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 unsigned int loadTexture(const char* path);
+void processInput(GLFWwindow* window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float deltaTime = 0.0f; // Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
 
+float yaw = -90.0f;
+float pitch = 0.0f;
+bool firstMouse{ true };
+float lastX = 400, lastY = 300;
 
 
 int main()
 {
     movement move;
     mazeGenerator generator;
+
+    // The camera
+    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
+    
+
+
 
 
     // Settings to be changed to become dynamic
@@ -37,8 +54,6 @@ int main()
 
     // Move this away from being ugly
     glm::vec3 playerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-    float playerYaw = -90.0f;
-    float playerPitch = 0.0f;
 
     glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -283,7 +298,9 @@ int main()
     double jumpStartingTime = 0.0f;
 
     // Hide mouse from the screen
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // Set callback function for mouse handling
+    glfwSetCursorPosCallback(window, mouse_callback);
 
     // Define AABBs for the player
     mazeGenerator::AABB playerAABB;
@@ -300,7 +317,11 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
 
-        move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        //move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
 
         // Check if collision:
         bool collisionFound = false;
@@ -340,20 +361,27 @@ int main()
         ourShader.use();
 
         // Update where the camera is looking
-        glm::vec3 front;
-        front.x = cos(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
-        front.y = sin(glm::radians(cameraPitch));
-        front.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
-        cameraFront = glm::normalize(front);
+        //glm::vec3 front;
+        //front.x = cos(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+        //front.y = sin(glm::radians(cameraPitch));
+        //front.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
+        //cameraFront = glm::normalize(front);
+
+
+        glm::mat4 view;
+
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        processInput(window);
+
 
         // Change actual angle the camera looks
-        glm::mat4 view = glm::lookAt(playerPosition, playerPosition + cameraFront, cameraUp);
+        //glm::mat4 view = glm::lookAt(playerPosition, playerPosition + cameraFront, cameraUp);
 
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         // I don't know what this does but it works
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 
         // pass transformation matrices to the shader
@@ -411,6 +439,35 @@ int main()
     return 0;
 }
 
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+    yaw += xoffset;
+    pitch += yoffset;
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y = sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(direction);
+}
+
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -456,6 +513,24 @@ unsigned int loadTexture(char const* path)
     }
 
     return textureID;
+}
+
+void processInput(GLFWwindow* window)
+{
+    // Close window when pressing escape
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    const float cameraSpeed = 2.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
+        cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
+        cameraSpeed;
 }
 
 
