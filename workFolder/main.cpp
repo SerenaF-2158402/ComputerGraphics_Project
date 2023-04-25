@@ -17,21 +17,26 @@
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 unsigned int loadTexture(const char* path);
-void processInput(GLFWwindow* window);
+void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
+
+
+// Move these all away from global
 float yaw = -90.0f;
 float pitch = 0.0f;
 bool firstMouse{ true };
 float lastX = 400, lastY = 300;
+// Problem: mouse callback can't accept this as extra, so need to use the camera.h to fix it somehow
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+
+
 
 
 int main()
@@ -43,7 +48,8 @@ int main()
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
     
-
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
 
@@ -55,8 +61,6 @@ int main()
     // Move this away from being ugly
     glm::vec3 playerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
     float cameraYaw = -90.0f;
     float cameraPitch = 0.0f;
     float cameraSpeed = 0.05f;
@@ -327,9 +331,9 @@ int main()
         bool collisionFound = false;
         for (int i = 0; i < cubeAABBs.size(); i++) {
             mazeGenerator::AABB aabb = cubeAABBs[i];
-            if (playerPosition.x >= aabb.min.x && playerPosition.x <= aabb.max.x &&
-                playerPosition.y >= aabb.min.y && playerPosition.y <= aabb.max.y &&
-                playerPosition.z >= aabb.min.z && playerPosition.z <= aabb.max.z) {
+            if (cameraPos.x >= aabb.min.x && cameraPos.x <= aabb.max.x &&
+                cameraPos.y >= aabb.min.y && cameraPos.y <= aabb.max.y &&
+                cameraPos.z >= aabb.min.z && cameraPos.z <= aabb.max.z) {
                 printf("COLLISION FOUDN! Counter: %d\n", counter);
                 collisionFound = true;
                 counter++;
@@ -367,11 +371,10 @@ int main()
         //front.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
         //cameraFront = glm::normalize(front);
 
-
+        processInput(window, &cameraPos, cameraFront, cameraUp);
         glm::mat4 view;
 
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        processInput(window);
 
 
         // Change actual angle the camera looks
@@ -515,21 +518,21 @@ unsigned int loadTexture(char const* path)
     return textureID;
 }
 
-void processInput(GLFWwindow* window)
+void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
 {
     // Close window when pressing escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     const float cameraSpeed = 2.5f * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
+        *cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        *cameraPos -= cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
+        *cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
         cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
+        *cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
         cameraSpeed;
 }
 
