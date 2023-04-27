@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #include "Camera.h"
-
+#include "shader_m.h"
 #include <iostream>
 #include "mazeGenerator.h"
 #include "movement.h"
@@ -21,21 +21,28 @@ void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFron
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
-
-
-float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+unsigned int loadTexture(const char* path);
 
 
 
 // Move these all away from global
 float yaw = -90.0f;
 float pitch = 0.0f;
-bool firstMouse{ true };
 float lastX = 400, lastY = 300;
 // Problem: mouse callback can't accept this as extra, so need to use the camera.h to fix it somehow
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
 
 
@@ -48,7 +55,7 @@ int main()
     Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
     
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 
@@ -305,6 +312,7 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // Set callback function for mouse handling
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     // Define AABBs for the player
     mazeGenerator::AABB playerAABB;
@@ -321,9 +329,12 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
 
-        float currentFrame = glfwGetTime();
+        float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        // Debug info:
+        //printf("Camera location: x: %f - y: %f - z: %f\n", cameraPos.x, cameraPos.y, cameraPos.z);
 
         //move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
 
@@ -401,7 +412,7 @@ int main()
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
-            float angle = 20.0f * i;
+            //float angle = 20.0f * i;
             //model = glm::rotate(model, time * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             ourShader.setMat4("model", model);
 
@@ -413,7 +424,10 @@ int main()
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+        //glDepthMask(GL_FALSE);
+
         skyboxShader.use();
+
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
@@ -422,6 +436,8 @@ int main()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glDepthMask(GL_TRUE);
+
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
 
@@ -435,6 +451,8 @@ int main()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &skyboxVAO);
+    glDeleteBuffers(1, &skyboxVBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -468,6 +486,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
+    camera.ProcessMouseMovement(xoffset, yoffset);
+
+
+    
 }
 
 
@@ -565,4 +587,8 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
