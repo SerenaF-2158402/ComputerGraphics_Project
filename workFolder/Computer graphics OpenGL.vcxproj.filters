@@ -65,12 +65,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="container.jpg">
-      <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="awesomeface.png">
-      <Filter>Source Files</Filter>
-    </Image>
     <Image Include="skybox\back.jpg">
       <Filter>Resource Files</Filter>
     </Image>
@@ -87,6 +81,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="skybox\top.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="awesomeface.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="container.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

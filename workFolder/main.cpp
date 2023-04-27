@@ -21,7 +21,6 @@ void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFron
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 unsigned int loadTexture(const char* path);
 
 
@@ -32,6 +31,8 @@ float pitch = 0.0f;
 float lastX = 400, lastY = 300;
 // Problem: mouse callback can't accept this as extra, so need to use the camera.h to fix it somehow
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -48,21 +49,20 @@ float lastFrame = 0.0f;
 
 int main()
 {
-    movement move;
+    //movement move;
     mazeGenerator generator;
 
     // The camera
-    Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+    //Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
     
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    
 
 
 
     // Settings to be changed to become dynamic
-    const unsigned int SCR_WIDTH = 800;
-    const unsigned int SCR_HEIGHT = 600;
+    //const unsigned int SCR_WIDTH = 800;
+    //const unsigned int SCR_HEIGHT = 600;
 
 
     // Move this away from being ugly
@@ -251,8 +251,6 @@ int main()
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
-    skyboxShader.use();
-    skyboxShader.setInt("skybox", 0);
     // load and create a texture 
     // -------------------------
     unsigned int texture1, texture2;
@@ -297,6 +295,11 @@ int main()
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
 
+    shader.use();
+    shader.setInt("skybox", 0);
+
+    skyboxShader.use();
+    skyboxShader.setInt("skybox", 0);
 
     // Get the maze from the input file
     std::vector<std::vector<int>> maze = generator.getMazeFromFile();
@@ -312,7 +315,6 @@ int main()
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // Set callback function for mouse handling
     glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
 
     // Define AABBs for the player
     mazeGenerator::AABB playerAABB;
@@ -383,9 +385,9 @@ int main()
         //cameraFront = glm::normalize(front);
 
         processInput(window, &cameraPos, cameraFront, cameraUp);
-        glm::mat4 view;
-
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        //glm::mat4 view;
+        
+        glm::mat4 view = glm::mat4(glm::mat3(glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp)));
 
 
         // Change actual angle the camera looks
@@ -428,7 +430,7 @@ int main()
 
         skyboxShader.use();
 
-        view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
+        //view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
         // skybox cube
@@ -546,8 +548,13 @@ void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFron
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     const float cameraSpeed = 2.5f * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
         *cameraPos += cameraSpeed * cameraFront;
+        //camera = Camera(cameraPos);
+        //camera =
+        
+
+    }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         *cameraPos -= cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
@@ -587,8 +594,4 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
-}
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
