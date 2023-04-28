@@ -18,6 +18,7 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 unsigned int loadTexture(const char* path);
 void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp);
+glm::mat4 calculateViewMatrix(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
@@ -30,7 +31,7 @@ float yaw = -90.0f;
 float pitch = 0.0f;
 float lastX = 400, lastY = 300;
 // Problem: mouse callback can't accept this as extra, so need to use the camera.h to fix it somehow
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, 1.0f);
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 // settings
@@ -49,24 +50,7 @@ float lastFrame = 0.0f;
 
 int main()
 {
-    //movement move;
     mazeGenerator generator;
-
-    // The camera
-    //Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
-
-    
-    
-
-
-
-    // Settings to be changed to become dynamic
-    //const unsigned int SCR_WIDTH = 800;
-    //const unsigned int SCR_HEIGHT = 600;
-
-
-    // Move this away from being ugly
-    glm::vec3 playerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 
     float cameraYaw = -90.0f;
     float cameraPitch = 0.0f;
@@ -316,31 +300,25 @@ int main()
     // Set callback function for mouse handling
     glfwSetCursorPosCallback(window, mouse_callback);
 
-    // Define AABBs for the player
-    mazeGenerator::AABB playerAABB;
-    playerAABB.min = playerPosition - glm::vec3(0.5f, 0.5f, 0.5f);
-    playerAABB.max = playerPosition + glm::vec3(0.5f, 0.5f, 0.5f);
-
     // Find boxes' AABB's
     std::vector<mazeGenerator::AABB> cubeAABBs = generator.getCubeAABB();
 
+    // Only used for debug:
     int counter = 0;
+
+    // Save last cameraPos so that if you try to go thru a wall you can be put back
+    glm::vec3 lastCameraPos;
 
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
     {
-
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // Debug info:
-        //printf("Camera location: x: %f - y: %f - z: %f\n", cameraPos.x, cameraPos.y, cameraPos.z);
 
-        //move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
-
-        // Check if collision:
+        // Check if collision by comparing the cameraPos with every box's AABB
         bool collisionFound = false;
         for (int i = 0; i < cubeAABBs.size(); i++) {
             mazeGenerator::AABB aabb = cubeAABBs[i];
@@ -355,12 +333,15 @@ int main()
         }
 
 
-        // DO this later
         // input
         // -----
-        //if (!collisionFound) {
-        //    move.processInput(window, playerPosition, cameraFront, cameraUp, &isJumping, &jumpStartingTime, &cameraYaw, &cameraPitch);
-        //}
+        if (!collisionFound) {
+            lastCameraPos = cameraPos;
+            processInput(window, &cameraPos, cameraFront, cameraUp);
+        }
+        else {
+            cameraPos = lastCameraPos;
+        }
 
 
         // render
@@ -374,24 +355,19 @@ int main()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
+        
+
+
+        //processInput(window, &cameraPos, cameraFront, cameraUp);
+        
+        glm::mat4 view = calculateViewMatrix(window, cameraPos, cameraFront, cameraUp);
+
         // activate shader
         ourShader.use();
-
-        // Update where the camera is looking
-        //glm::vec3 front;
-        //front.x = cos(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
-        //front.y = sin(glm::radians(cameraPitch));
-        //front.z = sin(glm::radians(cameraYaw)) * cos(glm::radians(cameraPitch));
-        //cameraFront = glm::normalize(front);
-
-        processInput(window, &cameraPos, cameraFront, cameraUp);
-        //glm::mat4 view;
-        
-        glm::mat4 view = glm::mat4(glm::mat3(glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp)));
-
+        ourShader.setMat4("view", view);
 
         // Change actual angle the camera looks
-        //glm::mat4 view = glm::lookAt(playerPosition, playerPosition + cameraFront, cameraUp);
+        //view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
@@ -402,7 +378,7 @@ int main()
 
         // pass transformation matrices to the shader
         ourShader.setMat4("projection", projection); // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
-        ourShader.setMat4("view", view);
+        
 
         float time = (float)glfwGetTime();
         // render boxes
@@ -426,13 +402,14 @@ int main()
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        //glDepthMask(GL_FALSE);
-
         skyboxShader.use();
 
-        //view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        skyboxShader.setMat4("view", view);
+        glm::mat4 skyboxView = glm::mat4(glm::mat3(view)); // remove translation from the view matrix
+        skyboxShader.setMat4("view", skyboxView);
         skyboxShader.setMat4("projection", projection);
+        glm::mat4 skyboxModel = glm::mat4(1.0f);
+        skyboxModel = glm::scale(skyboxModel, glm::vec3(100.0f)); // adjust the scale of the skybox cube
+        skyboxShader.setMat4("model", skyboxModel);
         // skybox cube
         glBindVertexArray(skyboxVAO);
         glActiveTexture(GL_TEXTURE0);
@@ -460,6 +437,12 @@ int main()
     // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
+}
+
+glm::mat4 calculateViewMatrix(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
+{
+    processInput(window, &cameraPos, cameraFront, cameraUp);
+    return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -548,13 +531,8 @@ void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFron
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     const float cameraSpeed = 2.5f * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         *cameraPos += cameraSpeed * cameraFront;
-        //camera = Camera(cameraPos);
-        //camera =
-        
-
-    }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         *cameraPos -= cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)

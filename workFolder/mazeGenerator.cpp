@@ -66,8 +66,8 @@ void mazeGenerator::findCubeLocations() {
                 
                 // Get AABB's of the cube
                 AABB aabb;
-                aabb.min = glm::vec3(i - 0.5f, y, j - 0.5f);
-                aabb.max = glm::vec3(i + 0.5f, y + 2.0f, j + 0.5f);
+                aabb.min = glm::vec3(i - 0.5f, y - 1.0f, j - 0.5f);
+                aabb.max = glm::vec3(i + 0.5f, y + 1.0f, j + 0.5f);
 
                 cubeAABB.push_back(aabb);
                  
