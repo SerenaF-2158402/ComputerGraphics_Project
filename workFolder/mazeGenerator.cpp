@@ -60,7 +60,7 @@ void mazeGenerator::findCubeLocations() {
             if (maze.at(i).at(j) == 1) {
                 // Calculate the position of the cube
                 float x = (i + 1);
-                float y = 0;
+                float y = 1;
 
                 cubePositions.push_back(glm::vec3(i, y, j));
                 
@@ -116,11 +116,10 @@ void mazeGenerator::drawFloor() {
 
     glm::mat4 model = glm::mat4(1.0f);
     Shader ourShader("texture.vs", "texture.fs");
-    model = glm::scale(model, glm::vec3(width, depth, 1.0f));
-    model = glm::translate(model, glm::vec3(-(maze[0].size() / 2.0f), 0.0f, -(maze.size() / 2.0f)));
+    model = glm::scale(model, glm::vec3(30.0f, 0.0f, 30.0f));
+    model = glm::translate(model, glm::vec3(-(maze[0].size() / 4.0f), 0.0f, -(maze.size() / 4.0f)));
 
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    model = glm::translate(model, glm::vec3(maze.size() / 4.8f, 27.0f, 0.05f));
 
     ourShader.setMat4("model", model);
 

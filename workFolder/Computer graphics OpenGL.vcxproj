@@ -170,6 +170,7 @@
     <Image Include="skybox\left.jpg" />
     <Image Include="skybox\right.jpg" />
     <Image Include="skybox\top.jpg" />
+    <Image Include="stained_wall_temp_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="maze.txt" />
