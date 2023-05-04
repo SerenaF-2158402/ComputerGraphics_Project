@@ -14,6 +14,7 @@
 #include <iostream>
 #include "mazeGenerator.h"
 #include "movement.h"
+#include "model.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 unsigned int loadTexture(const char* path);
@@ -250,8 +251,8 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
     int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load("stained_wall_temp_texture.jpg", &width, &height, &nrChannels, 0);
+    //stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    unsigned char* data = stbi_load("stained_wall.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -309,8 +310,12 @@ int main()
     // Save last cameraPos so that if you try to go thru a wall you can be put back
     glm::vec3 lastCameraPos;
 
+    Model ourModel("meshes/Low_poly_UFO.obj");
+    Shader modelShader("1.model_loading.vs", "1.model_loading.fs");
+
     // render loop
     // -----------
+
     while (!glfwWindowShouldClose(window))
     {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -399,6 +404,15 @@ int main()
         }
         generator.drawFloor();
 
+
+        modelShader.use();
+        modelShader.setMat4("projection", projection);
+        modelShader.setMat4("view", view);
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(50.0f,0.0f, 30.0f));
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        modelShader.setMat4("model", model);
+        ourModel.Draw(modelShader);
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content

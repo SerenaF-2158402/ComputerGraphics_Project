@@ -21,9 +21,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -43,11 +40,10 @@
     <None Include="6.1.skybox.fs" />
     <None Include="6.1.cubemaps.vs" />
     <None Include="6.1.cubemaps.fs" />
+    <None Include="1.model_loading.vs" />
+    <None Include="1.model_loading.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="shader.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="stb_image.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -62,6 +58,15 @@
     </ClInclude>
     <ClInclude Include="shader_m.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shader.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +95,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="stained_wall_temp_texture.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="stained_wall.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

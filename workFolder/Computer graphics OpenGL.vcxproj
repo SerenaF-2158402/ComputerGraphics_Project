@@ -116,7 +116,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,10 +140,11 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mazeGenerator.cpp" />
     <ClCompile Include="movement.cpp" />
-    <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="1.model_loading.fs" />
+    <None Include="1.model_loading.vs" />
     <None Include="6.1.cubemaps.fs" />
     <None Include="6.1.cubemaps.vs" />
     <None Include="6.1.skybox.fs" />
@@ -156,6 +157,8 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="mazeGenerator.h" />
+    <ClInclude Include="mesh.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="movement.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="shader_m.h" />
@@ -170,6 +173,7 @@
     <Image Include="skybox\left.jpg" />
     <Image Include="skybox\right.jpg" />
     <Image Include="skybox\top.jpg" />
+    <Image Include="stained_wall.jpg" />
     <Image Include="stained_wall_temp_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
