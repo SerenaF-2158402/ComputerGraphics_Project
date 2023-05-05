@@ -410,7 +410,7 @@ int main()
         modelShader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(50.0f,0.0f, 30.0f));
-        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        model = glm::scale(model, glm::vec3(0.50f, 0.50f, 0.50f));
         modelShader.setMat4("model", model);
         ourModel.Draw(modelShader);
 
