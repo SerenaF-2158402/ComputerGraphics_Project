@@ -77,7 +77,9 @@ void mazeGenerator::findCubeLocations() {
     }
 
 }
-void mazeGenerator::drawFloor() {
+void mazeGenerator::drawFloor(Shader floorshader) {
+
+
     // Compute the dimensions of the floor based on the maze size
     float width = maze[0].size() - 0.18f;
     float depth = maze.size() + 12.0f ;
@@ -115,13 +117,13 @@ void mazeGenerator::drawFloor() {
     glEnableVertexAttribArray(1);
 
     glm::mat4 model = glm::mat4(1.0f);
-    Shader ourShader("texture.vs", "texture.fs");
     model = glm::scale(model, glm::vec3(30.0f, 0.0f, 30.0f));
     model = glm::translate(model, glm::vec3(-(maze[0].size() / 4.0f), 0.0f, -(maze.size() / 4.0f)));
 
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    ourShader.setMat4("model", model);
+    floorshader.setMat4("model", model);
+
 
     // Draw the floor using glDrawArrays
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -130,4 +132,5 @@ void mazeGenerator::drawFloor() {
     glDisableVertexAttribArray(0);
     glDeleteBuffers(1, &floorVBO);
     glDeleteVertexArrays(1, &floorVAO);
+
 }

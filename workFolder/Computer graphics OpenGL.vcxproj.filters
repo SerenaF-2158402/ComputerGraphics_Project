@@ -42,6 +42,15 @@
     <None Include="6.1.cubemaps.fs" />
     <None Include="1.model_loading.vs" />
     <None Include="1.model_loading.fs" />
+    <None Include="floorTexture.vs" />
+    <None Include="floorTexture.fs" />
+    <None Include="gunter">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="1.colors.vs" />
+    <None Include="1.colors.fs" />
+    <None Include="1.light_cube.vs" />
+    <None Include="1.light_cube.fs" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stb_image.h">
@@ -98,6 +107,120 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="stained_wall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="black_floor.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="alien_wall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="visgraat.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="marble1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="alien2.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="pinksilk.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="gunter1.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="gunter.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="gunter_2.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="leaves.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="darksilk.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bloodvessel2.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="bloodvessel.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cells.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox1\_back.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox1\_bottom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox1\_front.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox1\_left.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox1\_right.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox1\_top.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox4\SkyBlue_back6.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox4\SkyBlue_bottom4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox4\SkyBlue_front5.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox4\SkyBlue_left2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox4\SkyBlue_right1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox4\SkyBlue_top3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\Sky2_back6.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\Sky2_bottom4.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\Sky2_front5.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\Sky2_left2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\Sky2_right1.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\Sky2_top3.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\back.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\bottom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\front.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\left.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\right.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Spacebox5\top.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

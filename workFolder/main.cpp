@@ -47,7 +47,8 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-
+// lighting
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
@@ -93,11 +94,15 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
 
+
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader("texture.vs", "texture.fs");
+    Shader wallShader("texture.vs", "texture.fs");
+    Shader floorShader("floorTexture.vs", "floorTexture.fs");
     Shader shader("6.1.cubemaps.vs", "6.1.cubemaps.fs");
     Shader skyboxShader("6.1.skybox.vs", "6.1.skybox.fs");
+    Shader lightingShader("1.colors.vs", "1.colors.fs");
+    Shader lightCubeShader("1.light_cube.vs", "1.light_cube.fs");
 
     // Stel de grootte van de vloer en de kubussen in
     float floorSize = 50.0f;
@@ -214,6 +219,15 @@ int main()
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
+    unsigned int lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
@@ -227,64 +241,87 @@ int main()
 
     std::vector<std::string> faces
     {
-        "skybox/right.jpg",
-        "skybox/left.jpg",
-        "skybox/top.jpg",
-        "skybox/bottom.jpg",
-        "skybox/front.jpg",
-        "skybox/back.jpg"
+        "Spacebox5/right.png",
+        "Spacebox5/left.png",
+        "Spacebox5/top.png",
+        "Spacebox5/bottom.png",
+        "Spacebox5/front.png",
+        "Spacebox5/back.png"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
 
     // load and create a texture 
     // -------------------------
-    unsigned int texture1, texture2;
+    unsigned int texture1;
     // texture 1
     // ---------
     glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     //stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    unsigned char* data = stbi_load("stained_wall.jpg", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("bloodvessel2.jpg", &width, &height, &nrChannels, 0);
     if (data)
     {
+        glBindTexture(GL_TEXTURE_2D, texture1);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
+
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     else
     {
         std::cout << "Failed to load texture" << std::endl;
     }
     stbi_image_free(data);
+
+
+
     // texture 2
     // ---------
+    unsigned int texture2;
     glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    data = stbi_load("bloodvessel.jpg", &width, &height, &nrChannels, 0);
+    //data = stbi_load("meshes / UFO / ufo_spec.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        glBindTexture(GL_TEXTURE_2D, texture2);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+    else
+    {
+        std::cout << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(data);
+
 
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
-    ourShader.use();
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
+   //wallShader.use();
+    //ourShader.setInt("texture1", 0);
+    //wallShader.setInt("texture2", 1);
 
-    shader.use();
-    shader.setInt("skybox", 0);
+    
 
-    skyboxShader.use();
-    skyboxShader.setInt("skybox", 0);
+    //shader.use();
+    //shader.setInt("skybox", 0);
+
+    //kyboxShader.use();
+
+    //floorShader.use();
+    //floorShader.setInt("texture2", 0);
 
     // Get the maze from the input file
     std::vector<std::vector<int>> maze = generator.getMazeFromFile();
@@ -310,7 +347,8 @@ int main()
     // Save last cameraPos so that if you try to go thru a wall you can be put back
     glm::vec3 lastCameraPos;
 
-    Model ourModel("meshes/Low_poly_UFO.obj");
+    Model ourModel("meshes/UFO/Low_poly_UFO.obj");
+    //Model ourModel("meshes/House/building_05.obj");
     Shader modelShader("1.model_loading.vs", "1.model_loading.fs");
 
     // render loop
@@ -335,6 +373,8 @@ int main()
                 counter++;
                 break;
             }
+
+
         }
 
 
@@ -355,10 +395,6 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
         // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
 
         
 
@@ -368,8 +404,10 @@ int main()
         glm::mat4 view = calculateViewMatrix(window, cameraPos, cameraFront, cameraUp);
 
         // activate shader
-        ourShader.use();
-        ourShader.setMat4("view", view);
+        wallShader.use();
+        wallShader.setMat4("view", view);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture2);
 
         // Change actual angle the camera looks
         //view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
@@ -382,12 +420,17 @@ int main()
 
 
         // pass transformation matrices to the shader
-        ourShader.setMat4("projection", projection); // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
+        wallShader.setMat4("projection", projection); // note: currently we set the projection matrix each frame, but since the projection matrix rarely changes it's often best practice to set it outside the main loop only once.
         
 
         float time = (float)glfwGetTime();
+       
+
+
         // render boxes
         glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
         // Draw each cube
         for (unsigned int i = 0; i < cubePositions.size(); i++)
         {
@@ -397,23 +440,31 @@ int main()
             model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
             //float angle = 20.0f * i;
             //model = glm::rotate(model, time * glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            ourShader.setMat4("model", model);
+            wallShader.setMat4("model", model);
 
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
+           
         }
-        generator.drawFloor();
 
-
+    
         modelShader.use();
         modelShader.setMat4("projection", projection);
         modelShader.setMat4("view", view);
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(50.0f,0.0f, 30.0f));
-        model = glm::scale(model, glm::vec3(0.50f, 0.50f, 0.50f));
+        model = glm::translate(model, glm::vec3(0.155f,0.0f, 30.0f));
+        model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
         modelShader.setMat4("model", model);
         ourModel.Draw(modelShader);
 
+        floorShader.use();
+        floorShader.setMat4("projection", projection);
+        floorShader.setMat4("view", view);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        generator.drawFloor(floorShader);
+     
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyboxShader.use();
@@ -431,8 +482,23 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //glDepthMask(GL_TRUE);
 
+
+         // also draw the lamp object
+        lightCubeShader.use();
+        lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0, 0, 0));
+        model = glm::scale(model, glm::vec3(1.0f)); // a smaller cube
+        lightCubeShader.setMat4("model", model);
+
+        glBindVertexArray(lightCubeVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
+
+        
 
         // glfw: swap buffers and l IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -585,5 +651,8 @@ unsigned int loadCubemap(std::vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
+
     return textureID;
 }
+
+
