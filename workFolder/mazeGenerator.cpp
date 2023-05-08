@@ -81,17 +81,17 @@ void mazeGenerator::drawFloor(Shader floorshader) {
 
 
     // Compute the dimensions of the floor based on the maze size
-    float width = maze[0].size() - 0.18f;
-    float depth = maze.size() + 12.0f ;
+    float width = maze[0].size() - 0.20f;
+    float depth = maze.size() + 10.0f ;
 
     // Define the vertices for the floor
     float floorVertices[] = {
-        -0.5f, -0.5f,  0.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.0f,  1.0f,  1.0f,
-         0.5f,  0.5f,  0.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
     };
     // Scale the floor vertices to match the maze size
     for (int i = 0; i < 30; i += 5) {
@@ -99,28 +99,28 @@ void mazeGenerator::drawFloor(Shader floorshader) {
         floorVertices[i + 1] *= depth;
     }
 
-    // Set up the vertex array object (VAO)
+    /// configure floor VAO and VBO
     unsigned int floorVAO, floorVBO;
     glGenVertexArrays(1, &floorVAO);
     glGenBuffers(1, &floorVBO);
 
-    glBindVertexArray(floorVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    glBindVertexArray(floorVAO);
 
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(30.0f, 0.0f, 30.0f));
-    model = glm::translate(model, glm::vec3(-(maze[0].size() / 4.0f), 0.0f, -(maze.size() / 4.0f)));
+    model = glm::scale(model, glm::vec3(30.0f, 0.0f, 15.0f));
 
     model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 10.0f, 20.0f));
 
     floorshader.setMat4("model", model);
 
