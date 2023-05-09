@@ -301,7 +301,6 @@ int main()
     Model cubeModel("meshes/Block_blender/mazecube.obj");
     Model floorModel("meshes/Block_blender/mazePlain.obj");
 
-    //Model ourModel("meshes/House/building_05.obj");
     Shader modelShader("1.model_loading.vs", "1.model_loading.fs");
     
 
@@ -421,7 +420,7 @@ int main()
         
 
        
-        
+     
 
         // spotLight
         lightingShader.setVec3("spotLight.position", camera.Position);
