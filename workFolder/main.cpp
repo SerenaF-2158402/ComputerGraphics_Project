@@ -409,7 +409,7 @@ int main()
         lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
         for (int i = 0; i < 4; i++) {
-            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", glm::vec3(10.1f, 1.5f, 8.0f));
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", glm::vec3(10.1f, 0.1f, 8.0f));
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.05f, 0.05f, 0.05f);
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", 0.8f, 0.8f, 0.8f);
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", 1.0f, 1.0f, 1.0f);
@@ -441,8 +441,7 @@ int main()
         lightingShader.setMat4("model", model);
         // render boxes
 
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture2);
         //lightCubeShader.use();
@@ -456,6 +455,16 @@ int main()
         }
 
 
+        //draw floor
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        lightingShader.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(10.1f, 0.0f, 8.0f));
+        lightingShader.setMat4("model", model);
+        floorModel.Draw(lightingShader);
+
+        //light cube under the ufo
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
@@ -481,16 +490,7 @@ int main()
 
        
 
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        modelShader.use();
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(10.1f, 0.0f, 8.0f));
-        //model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
-   
-        modelShader.setMat4("model", model);
-        floorModel.Draw(modelShader);
+        
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
