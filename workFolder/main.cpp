@@ -44,6 +44,8 @@ int NUM_LAMPS = 20;
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
 bool firstMouse = true;
+float yVelocity = 0.0f;
+bool isJumping = false;
 
 // timing
 float deltaTime = 0.0f;
@@ -337,22 +339,24 @@ int main()
         lastFrame = currentFrame;
 
 
-        // Check if collision by comparing the cameraPos with every box's AABB
+        // Check if collision by comparing a sphere around the cameraPos with every box's AABB
         bool collisionFound = false;
+        glm::vec3 sphereCenter = cameraPos + glm::vec3(0.0f, 0.5f, 0.0f); // Use cameraPos with offset
+        float sphereRadius = 0.2f; // Adjust this value as needed
         for (int i = 0; i < cubeAABBs.size(); i++) {
             mazeGenerator::AABB aabb = cubeAABBs[i];
-            if (cameraPos.x >= aabb.min.x && cameraPos.x <= aabb.max.x &&
-                cameraPos.y >= aabb.min.y && cameraPos.y <= aabb.max.y &&
-                cameraPos.z >= aabb.min.z && cameraPos.z <= aabb.max.z) {
-                printf("COLLISION FOUDN! Counter: %d\n", counter);
+            glm::vec3 closestPointInAABB = glm::clamp(sphereCenter, aabb.min, aabb.max);
+            float distance = glm::distance(closestPointInAABB, sphereCenter);
+            if (distance < sphereRadius) {
+                printf("COLLISION FOUND! Counter: %d\n", counter);
                 collisionFound = true;
                 counter++;
                 break;
             }
-
-
         }
 
+
+        printf("Position: %f, %f, %f\n", cameraPos[0], cameraPos[1], cameraPos[2]);
 
         // input
         // -----
@@ -634,17 +638,40 @@ void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFron
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     const float cameraSpeed = 2.5f * deltaTime;
+    glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFront, cameraUp));
+
+    const float jumpSpeed = 7.0f; // m/s
+    const float gravity = 9.81f; // m/s^2
+
+    // When loading for the first time the deltatime is like 5 seconds depending on computer and it instantly teleports the player under the floor so we skip the first tick
+    if (deltaTime < 1.0f) {
+        // Apply gravity if player is in the air
+        cameraPos->y += yVelocity * deltaTime;
+        yVelocity -= gravity * deltaTime;
+        if (cameraPos->y <= 0.5f) {
+            cameraPos->y = 0.5f;
+            yVelocity = 0.0f;
+            isJumping = false;
+        }
+    }
+
+
+    // Move player
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        *cameraPos += cameraSpeed * cameraFront;
+        *cameraPos += glm::vec3(cameraFront.x, 0.0f, cameraFront.z) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        *cameraPos -= cameraSpeed * cameraFront;
+        *cameraPos -= glm::vec3(cameraFront.x, 0.0f, cameraFront.z) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        *cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) *
-        cameraSpeed;
+        *cameraPos -= cameraRight * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        *cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) *
-        cameraSpeed;
+        *cameraPos += cameraRight * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !isJumping && cameraPos->y <= 0.5f) {
+        yVelocity = jumpSpeed;
+        isJumping = true;
+    }
 }
+
+
 
 
 unsigned int loadCubemap(std::vector<std::string> faces)
