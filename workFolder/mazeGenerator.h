@@ -26,7 +26,6 @@ public:
 	};
 	mazeGenerator();
 
-	void drawFloor(Shader flooruser);
 
 	int loadCubemap(std::vector<std::string> faces);
 

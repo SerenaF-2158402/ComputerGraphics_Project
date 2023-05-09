@@ -257,7 +257,7 @@ int main()
         "Spacebox5/back.png"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
-    unsigned int texture1 = loadTexture("darksilk.jpg");
+    unsigned int texture1 = loadTexture("black_floor.jpg");
 
     unsigned int texture2 = loadTexture("bloodvessel.jpg");
    
@@ -299,9 +299,11 @@ int main()
 
     Model ourModel("meshes/UFO/Low_poly_UFO.obj");
     Model cubeModel("meshes/Block_blender/mazecube.obj");
+    Model floorModel("meshes/Block_blender/mazePlain.obj");
 
     //Model ourModel("meshes/House/building_05.obj");
     Shader modelShader("1.model_loading.vs", "1.model_loading.fs");
+    
 
     
     //instancing
@@ -316,7 +318,6 @@ int main()
         glm::vec3 cubePos = cubePositions[i];
         modelCube = glm::translate(modelCube, cubePos);
         modelCube = glm::scale(modelCube, glm::vec3(0.5f, 1.0f, 0.5f));
-        // 4. now add to list of matrices
         modelMatrices[i] = modelCube;
     }
 
@@ -447,21 +448,12 @@ int main()
         //lightCubeShader.use();
         lightingShader.use();
 
-        /*
-        // Draw each cube
-        for (unsigned int i = 0; i < cubePositions.size(); i++)
-        {
-         
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::scale(model, glm::vec3(0.5f, 1.0f, 0.5f));
-            lightingShader.setMat4("model", model);
-            cubeModel.Draw(lightingShader);
-
-        }*/
-
         // draw cubes with instancing
-        
+        for (unsigned int i = 0; i < amount; i++)
+        {
+            lightingShader.setMat4("model", modelMatrices[i]);
+            cubeModel.Draw(lightingShader);
+        }
 
 
         lightCubeShader.use();
@@ -489,13 +481,16 @@ int main()
 
        
 
-        floorShader.use();
-        floorShader.setMat4("projection", projection);
-        floorShader.setMat4("view", view);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
-        generator.drawFloor(floorShader);
+        modelShader.use();
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(10.1f, 0.0f, 8.0f));
+        //model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
+   
+        modelShader.setMat4("model", model);
+        floorModel.Draw(modelShader);
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
