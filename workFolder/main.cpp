@@ -304,6 +304,21 @@ int main()
     Shader modelShader("1.model_loading.vs", "1.model_loading.fs");
 
     
+    //instancing
+    unsigned int amount = cubePositions.size();
+    glm::mat4* modelMatrices;
+    modelMatrices = new glm::mat4[amount];
+    srand(static_cast<unsigned int>(glfwGetTime())); // initialize random seed
+
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        glm::mat4 modelCube = glm::mat4(1.0f);
+        glm::vec3 cubePos = cubePositions[i];
+        modelCube = glm::translate(modelCube, cubePos);
+        modelCube = glm::scale(modelCube, glm::vec3(0.5f, 1.0f, 0.5f));
+        // 4. now add to list of matrices
+        modelMatrices[i] = modelCube;
+    }
 
     // render loop
     // -----------
@@ -432,26 +447,21 @@ int main()
         //lightCubeShader.use();
         lightingShader.use();
 
+        /*
         // Draw each cube
         for (unsigned int i = 0; i < cubePositions.size(); i++)
         {
-            /*
-            // Calculate the model matrix for each object and pass it to shader before drawing
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
-            lightingShader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);*/
-
-
-            
+         
             model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             model = glm::scale(model, glm::vec3(0.5f, 1.0f, 0.5f));
             lightingShader.setMat4("model", model);
             cubeModel.Draw(lightingShader);
 
-        }
+        }*/
+
+        // draw cubes with instancing
+        
 
 
         lightCubeShader.use();
