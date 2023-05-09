@@ -114,7 +114,6 @@ int main()
 
 
 
-
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -299,8 +298,12 @@ int main()
     glm::vec3 lastCameraPos;
 
     Model ourModel("meshes/UFO/Low_poly_UFO.obj");
+    Model cubeModel("meshes/Block_blender/mazecube.obj");
+
     //Model ourModel("meshes/House/building_05.obj");
     Shader modelShader("1.model_loading.vs", "1.model_loading.fs");
+
+    
 
     // render loop
     // -----------
@@ -309,6 +312,7 @@ int main()
     std::vector<glm::vec3> pointLightPositions;
 
     // positions of the point lights
+    modelShader.use();
 
 
     while (!glfwWindowShouldClose(window))
@@ -425,16 +429,27 @@ int main()
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture2);
+        //lightCubeShader.use();
+        lightingShader.use();
 
         // Draw each cube
         for (unsigned int i = 0; i < cubePositions.size(); i++)
         {
+            /*
             // Calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             model = glm::scale(model, glm::vec3(1.0f, 2.0f, 1.0f));
             lightingShader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glDrawArrays(GL_TRIANGLES, 0, 36);*/
+
+
+            
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            model = glm::scale(model, glm::vec3(0.5f, 1.0f, 0.5f));
+            lightingShader.setMat4("model", model);
+            cubeModel.Draw(lightingShader);
 
         }
 
@@ -451,6 +466,8 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
+        
+
         modelShader.use();
         modelShader.setMat4("projection", projection);
         modelShader.setMat4("view", view);
@@ -459,6 +476,8 @@ int main()
         model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
         modelShader.setMat4("model", model);
         ourModel.Draw(modelShader);
+
+       
 
         floorShader.use();
         floorShader.setMat4("projection", projection);
