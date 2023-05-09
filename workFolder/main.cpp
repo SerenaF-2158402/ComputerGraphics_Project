@@ -411,8 +411,8 @@ int main()
         lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
         lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-        for (int i = 0; i < 4; i++) {
-            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", glm::vec3(10.1f, 0.1f, 8.0f));
+        for (int i = 0; i < 8; i++) {
+            lightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", glm::vec3(10.1f, 1.1f + i, 8.0f));
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.05f, 0.05f, 0.05f);
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", 0.8f, 0.8f, 0.8f);
             lightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", 1.0f, 1.0f, 1.0f);
