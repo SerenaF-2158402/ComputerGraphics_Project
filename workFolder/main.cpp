@@ -341,7 +341,7 @@ int main()
 
         // Check if collision by comparing a sphere around the cameraPos with every box's AABB
         bool collisionFound = false;
-        glm::vec3 sphereCenter = cameraPos + glm::vec3(0.0f, 0.5f, 0.0f); // Use cameraPos with offset
+        glm::vec3 sphereCenter = cameraPos + glm::vec3(0.2f, 0.2f, 0.2f); // Use cameraPos with offset
         float sphereRadius = 0.2f; // Adjust this value as needed
         for (int i = 0; i < cubeAABBs.size(); i++) {
             mazeGenerator::AABB aabb = cubeAABBs[i];
