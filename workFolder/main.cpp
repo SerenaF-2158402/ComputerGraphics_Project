@@ -4,6 +4,7 @@
 #include <glm/glm/gtc/type_ptr.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include "stb_image.h"
+#include <irrKlang/include/irrKlang.h>
 #include "shader.h"
 #include <fstream>
 #include <iostream>
@@ -16,16 +17,21 @@
 #include "movement.h"
 #include "model.h"
 
+using namespace irrklang;
+
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 unsigned int loadTexture(const char* path);
-void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp);
-glm::mat4 calculateViewMatrix(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp);
+void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, std::vector<mazeGenerator::AABB> cubeAABBs);
+glm::mat4 calculateViewMatrix(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, std::vector<mazeGenerator::AABB> cubeAABBs);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void newPosIsCollision(glm::vec3* cameraPos, glm::vec3 newLocation, std::vector<mazeGenerator::AABB> cubeAABBs);
 unsigned int loadCubemap(std::vector<std::string> faces);
+bool handleLeftMouseButtonPress(GLFWwindow* window);
 
 unsigned int loadTexture(const char* path);
 
-
+ISoundEngine* SoundEngine = createIrrKlangDevice();
 
 // Move these all away from global
 float yaw = -90.0f;
@@ -331,6 +337,8 @@ int main()
     // positions of the point lights
     modelShader.use();
 
+    bool isUfoFound = false;
+
 
     while (!glfwWindowShouldClose(window))
     {
@@ -338,35 +346,7 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-
-        // Check if collision by comparing a sphere around the cameraPos with every box's AABB
-        bool collisionFound = false;
-        glm::vec3 sphereCenter = cameraPos + glm::vec3(0.2f, 0.2f, 0.2f); // Use cameraPos with offset
-        float sphereRadius = 0.2f; // Adjust this value as needed
-        for (int i = 0; i < cubeAABBs.size(); i++) {
-            mazeGenerator::AABB aabb = cubeAABBs[i];
-            glm::vec3 closestPointInAABB = glm::clamp(sphereCenter, aabb.min, aabb.max);
-            float distance = glm::distance(closestPointInAABB, sphereCenter);
-            if (distance < sphereRadius) {
-                printf("COLLISION FOUND! Counter: %d\n", counter);
-                collisionFound = true;
-                counter++;
-                break;
-            }
-        }
-
-
-        printf("Position: %f, %f, %f\n", cameraPos[0], cameraPos[1], cameraPos[2]);
-
-        // input
-        // -----
-        if (!collisionFound) {
-            lastCameraPos = cameraPos;
-            processInput(window, &cameraPos, cameraFront, cameraUp);
-        }
-        else {
-            cameraPos = lastCameraPos;
-        }
+        processInput(window, &cameraPos, cameraFront, cameraUp, cubeAABBs);
 
 
         // render
@@ -378,24 +358,12 @@ int main()
 
 
 
-
         //processInput(window, &cameraPos, cameraFront, cameraUp);
 
-        glm::mat4 view = calculateViewMatrix(window, cameraPos, cameraFront, cameraUp);
-        int step = std::max(numCubes / NUM_LAMPS, 1);
-
-        for (unsigned int i = 0; i < NUM_LAMPS; i++)
-        {
-            int index = i * step;
-            pointLightPositions.push_back(glm::vec3(cubePositions[index].x, cubePositions[index].y + 2.5f, cubePositions[index].z));
-        }
-
+        glm::mat4 view = calculateViewMatrix(window, cameraPos, cameraFront, cameraUp, cubeAABBs);
 
 
         float time = (float)glfwGetTime();
-
-
-
 
 
         // pass transformation matrices to the shader
@@ -421,10 +389,10 @@ int main()
             lightingShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
         }
 
-        
 
-       
-     
+
+
+
 
         // spotLight
         lightingShader.setVec3("spotLight.position", camera.Position);
@@ -444,7 +412,7 @@ int main()
         lightingShader.setMat4("model", model);
         // render boxes
 
-      
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture2);
         //lightCubeShader.use();
@@ -478,22 +446,17 @@ int main()
         model = glm::scale(model, glm::vec3(1.5f)); // Make it a smaller cube
         lightCubeShader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
         
-
-        modelShader.use();
-        modelShader.setMat4("projection", projection);
-        modelShader.setMat4("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(10.1f, 10.0f, 8.0f));
-        model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
-        modelShader.setMat4("model", model);
-        ourModel.Draw(modelShader);
-
-       
-
-        
+        if (!isUfoFound) {
+            modelShader.use();
+            modelShader.setMat4("projection", projection);
+            modelShader.setMat4("view", view);
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(10.1f, 10.0f, 8.0f));
+            model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
+            modelShader.setMat4("model", model);
+            ourModel.Draw(modelShader);
+        }
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -512,7 +475,12 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //glDepthMask(GL_TRUE);
 
-
+        // Check if left mouse button is being pressed
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !isUfoFound)
+        {
+            // Call function to handle left mouse button press
+            isUfoFound = handleLeftMouseButtonPress(window);
+        }
 
         glBindVertexArray(lightCubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -546,9 +514,9 @@ int main()
     return 0;
 }
 
-glm::mat4 calculateViewMatrix(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
+glm::mat4 calculateViewMatrix(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, std::vector<mazeGenerator::AABB> cubeAABBs)
 {
-    processInput(window, &cameraPos, cameraFront, cameraUp);
+    processInput(window, &cameraPos, cameraFront, cameraUp, cubeAABBs);
     return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
@@ -584,6 +552,24 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 }
 
+
+bool handleLeftMouseButtonPress(GLFWwindow* window) {
+    double pixelX = SCR_WIDTH / 2;
+    double pixelY = SCR_HEIGHT / 2; // Flip y-coordinate to OpenGL orientation
+
+    // Read the color of the pixel that the mouse is currently over
+    unsigned char color[4];
+    glReadPixels(pixelX, pixelY, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+
+    // Print the color value
+    //printf("Mouse color: (%d, %d, %d)\n", color[0], color[1], color[2]);
+    if (color[1] > 240 && color[0] < 240 && color[2] < 240) {
+        printf("UFO FOUND\n");
+        return true;
+    }
+    printf("No UFO!\n");
+    return false;
+}
 
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -632,7 +618,7 @@ unsigned int loadTexture(char const* path)
     return textureID;
 }
 
-void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
+void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, std::vector<mazeGenerator::AABB> cubeAABBs)
 {
     // Close window when pressing escape
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -658,16 +644,45 @@ void processInput(GLFWwindow* window, glm::vec3* cameraPos, glm::vec3 cameraFron
 
     // Move player
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        *cameraPos += glm::vec3(cameraFront.x, 0.0f, cameraFront.z) * cameraSpeed;
+        newPosIsCollision(cameraPos, glm::vec3(cameraFront.x, 0.0f, cameraFront.z) * cameraSpeed, cubeAABBs);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        *cameraPos -= glm::vec3(cameraFront.x, 0.0f, cameraFront.z) * cameraSpeed;
+        newPosIsCollision(cameraPos, -glm::vec3(cameraFront.x, 0.0f, cameraFront.z) * cameraSpeed, cubeAABBs);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        *cameraPos -= cameraRight * cameraSpeed;
+        newPosIsCollision(cameraPos, -cameraRight * cameraSpeed, cubeAABBs);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        *cameraPos += cameraRight * cameraSpeed;
+        newPosIsCollision(cameraPos, cameraRight * cameraSpeed, cubeAABBs);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && !isJumping && cameraPos->y <= 0.5f) {
         yVelocity = jumpSpeed;
         isJumping = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+        newPosIsCollision(cameraPos, glm::vec3(0.0f, gravity, 0.0f), cubeAABBs);
+}
+
+void newPosIsCollision(glm::vec3* cameraPos, glm::vec3 newLocation, std::vector<mazeGenerator::AABB> cubeAABBs) {
+    // Check if collision by comparing a sphere around the cameraPos with every box's AABB
+    bool collisionFound = false;
+    glm::vec3 sphereCenter = *cameraPos + glm::vec3(0.1f, 0.1f, 0.1f); // Use cameraPos with offset
+    float sphereRadius = 0.25f; // Adjust this value as needed
+    for (int i = 0; i < cubeAABBs.size(); i++) {
+        mazeGenerator::AABB aabb = cubeAABBs[i];
+        glm::vec3 closestPointInAABB = glm::clamp(sphereCenter, aabb.min, aabb.max);
+        float distance = glm::distance(closestPointInAABB, sphereCenter);
+        glm::vec3 direction = glm::normalize(newLocation);
+        glm::vec3 directionToAABB = glm::normalize(closestPointInAABB - sphereCenter);
+        if (distance < sphereRadius && glm::dot(direction, directionToAABB) > 0) {
+            collisionFound = true;
+            break;
+        }
+    }
+
+    if (!collisionFound) {
+        *cameraPos += newLocation;
+        if (cameraPos->y > 50.0f)
+            cameraPos->y = 50.0f;
+    }
+    else {
+        SoundEngine->play2D("Wrong.wav", false);
     }
 }
 
